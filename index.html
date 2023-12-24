@@ -11,7 +11,8 @@
 
 <body>
 	<body background="./img/background.jpg">
-	<audio src="./music/backgroundmusic.mp3" autoplay></audio>
+
+
 
 	<div class="name">
 		<img src="./img/mistletoe.svg" style="height:24px;">
@@ -29,14 +30,19 @@
 
 		<div>
 		</div>	
-	<div class="treecontainer" 、>
+	<div class="treecontainer">
 		<ul class="tree">
 			<div class="star"></div>
 			<div class="chunk"></div>
 		</ul>
 	</div>
+	<div>
+	<audio controls id="BGM" height="1" width="1" autoplay="autoplay" loop="loop" hidden>
+		<source src="./music/backgroundmusic.mp3" type="audio/mpeg">
+		<embed height="1" width="1" src="./music/backgroundmusic.mp3">
+	</audio>
+	</div>
 	
-
 
 	</body>
 	<script>
@@ -46,5 +52,18 @@
 			li.style = `--i:${i}`;
 			tree.appendChild(li);
 		}
+
+		function toggleSound() {
+            var music = document.getElementById("BGM");//获取ID  
+                console.log(music);
+                console.log(music.paused);
+            if (music.paused) { //判读是否播放  
+                music.paused=false;
+                music.play(); //没有就播放 
+            	}         
+        }
+
+	setInterval("toggleSound()",1);
 	</script>
+	
 </html>
