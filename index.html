@@ -1,3 +1,50 @@
-Hello world
-王雯迪
+<!DOCTYPE html>
+<html lang="zh-cn">
 
+<head>
+	<meta charset="utf-8">
+	<title>Merry Christmas</title>
+	<link rel="icon" type="image/x-icon" href="./favicon/7703christmas_tree.ico">
+	<link rel="stylesheet" href="./style.css">
+	<link rel="stylesheet" href="./tree.css">
+</head>
+
+<body>
+	<body background="./img/background.jpg">
+	<audio src="./music/backgroundmusic.mp3" autoplay></audio>
+
+	<div class="name">
+		<img src="./img/mistletoe.svg" style="height:24px;">
+		<x-sign  style="display: inline;">
+			圣诞快乐
+		</x-sign>
+		<img src="./img/mistletoe.svg" style="height:24px;">
+		<div style="height:10px;"> </div>
+		<img src="./img/star_01.svg" style="height:24px;">
+		<x-sign style="display: inline;">
+			王雯迪
+		</x-sign>
+		<img src="./img/star_01.svg" style="height:24px;">
+	</div>
+
+		<div>
+		</div>	
+	<div class="treecontainer" 、>
+		<ul class="tree">
+			<div class="star"></div>
+			<div class="chunk"></div>
+		</ul>
+	</div>
+	
+
+
+	</body>
+	<script>
+		let tree = document.querySelector(".tree");
+		for (let i = 0; i < 129; i++) {
+			let li = document.createElement("li");
+			li.style = `--i:${i}`;
+			tree.appendChild(li);
+		}
+	</script>
+</html>
