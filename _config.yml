@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: Reglucis 的博客
 subtitle: ''
 description: ''
 keywords:
-author: John Doe
+author: Reglucis
 language: en
 timezone: ''
 
@@ -96,7 +96,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: argon
+theme: butterfly
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
@@ -105,8 +105,3 @@ deploy:
   repo: git@github.com:Reglucis/Reglucis.github.io.git
   branch: main
 
-# search
-search:
-  path: search.xml
-  field: post
-  content: true
