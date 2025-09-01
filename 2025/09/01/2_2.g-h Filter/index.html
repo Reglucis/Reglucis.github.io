@@ -1,0 +1,414 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>贝叶斯滤波器系列(4) - G-H 滤波器 | Reglucis 的博客</title><meta name="author" content="Reglucis"><meta name="copyright" content="Reglucis"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="g-h 滤波器 1234567# %matplotlib widgetimport matplotlib.pyplot as pltimport numpy as npimport MyFilter.FilterPerformance as FPimport MyFilter.UserLib as UserLibfigsize&#x3D;(25, 5) 1 引言 有了贝叶斯思想后我们再回头来看之前使用的滤波">
+<meta property="og:type" content="article">
+<meta property="og:title" content="贝叶斯滤波器系列(4) - G-H 滤波器">
+<meta property="og:url" content="https://reglucis.github.io/2025/09/01/2_2.g-h%20Filter/index.html">
+<meta property="og:site_name" content="Reglucis 的博客">
+<meta property="og:description" content="g-h 滤波器 1234567# %matplotlib widgetimport matplotlib.pyplot as pltimport numpy as npimport MyFilter.FilterPerformance as FPimport MyFilter.UserLib as UserLibfigsize&#x3D;(25, 5) 1 引言 有了贝叶斯思想后我们再回头来看之前使用的滤波">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://reglucis.github.io/img/myauther.jpg">
+<meta property="article:published_time" content="2025-09-01T13:48:44.000Z">
+<meta property="article:modified_time" content="2025-09-01T15:38:11.801Z">
+<meta property="article:author" content="Reglucis">
+<meta property="article:tag" content="滤波器">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://reglucis.github.io/img/myauther.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "贝叶斯滤波器系列(4) - G-H 滤波器",
+  "url": "https://reglucis.github.io/2025/09/01/2_2.g-h%20Filter/",
+  "image": "https://reglucis.github.io/img/myauther.jpg",
+  "datePublished": "2025-09-01T13:48:44.000Z",
+  "dateModified": "2025-09-01T15:38:11.801Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Reglucis",
+      "url": "https://reglucis.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/myfavicon.jpg"><link rel="canonical" href="https://reglucis.github.io/2025/09/01/2_2.g-h%20Filter/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '贝叶斯滤波器系列(4) - G-H 滤波器',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(https://w.wallhaven.cc/full/qz/wallhaven-qzrmq7.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/myauther.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 友链</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://yin.nnneri.me/"><span> 小音理</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://w.wallhaven.cc/full/1p/wallhaven-1prrw9.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Reglucis 的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">贝叶斯滤波器系列(4) - G-H 滤波器</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 友链</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://yin.nnneri.me/"><span> 小音理</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">贝叶斯滤波器系列(4) - G-H 滤波器</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-01T13:48:44.000Z" title="发表于 2025-09-01 21:48:44">2025-09-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-01T15:38:11.801Z" title="更新于 2025-09-01 23:38:11">2025-09-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%B4%9D%E5%8F%B6%E6%96%AF%E6%BB%A4%E6%B3%A2%E5%99%A8/">贝叶斯滤波器</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="g-h-滤波器">g-h 滤波器</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># %matplotlib widget</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> MyFilter.FilterPerformance <span class="keyword">as</span> FP</span><br><span class="line"><span class="keyword">import</span> MyFilter.UserLib <span class="keyword">as</span> UserLib</span><br><span class="line"></span><br><span class="line">figsize=(<span class="number">25</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="引言">1 引言</h2>
+<p>有了贝叶斯思想后我们再回头来看之前使用的滤波器 - <strong>CA
+Filter</strong>:<br />
+<span class="math display">$$
+\hat{x} = \frac{n-1}{n} \hat{x}_{last}+ \frac{1}{n}x_n
+$$</span> <span class="math inline">   </span> <span
+class="math inline"><em>x̂</em><sub><em>l</em><em>a</em><em>s</em><em>t</em></sub></span>
+就是我们的先验信息，且随着次数增加，我们越来越相信先验信息(权重在极限情况下为
+1 ); 新的测量值为 <span
+class="math inline"><em>x</em><sub><em>n</em></sub></span> ,
+每次观测的新息越来越少，我们对观测的信任程度逐渐下降(权重在极限情况下为
+0 )。</p>
+<ul>
+<li><strong>SMA Filter</strong>: <span class="math display">$$
+\hat{x} = \hat{x}_{last} + \frac{1}{n} \cdot (x_M - x_{M-n})
+$$</span></li>
+</ul>
+<p><span class="math inline">   </span> 在 SMA
+中，先验信息依旧是之前测量平均值。但每次都不再信任队列中最末端的数据，并将新数据加入队列中。</p>
+<ul>
+<li><strong>WMA Filter</strong>:</li>
+</ul>
+<p><span class="math inline">   </span> WMA 与 SMA
+相类似，只不过其更相信较新的数据。(其实 WMA 是个双层的 SMA ,
+权重是一个杨辉三角)</p>
+<ul>
+<li><p><strong>EMA Filte</strong>r: <span
+class="math display">lim<sub><em>n</em> → ∞</sub><em>x̂</em><sub><em>n</em> + 1</sub> = (1−<em>α</em>) ⋅ <em>x̂</em><sub><em>n</em></sub> + <em>α</em> ⋅ <em>x</em><sub><em>n</em> + 1</sub></span>
+<span class="math inline">   </span> EMA
+对于先验新息的信任程度是一个固定的常数 (1-), 并对新息给予以恒定的信任度
+。(无偏估计嘛，信任度必须是互补的)</p></li>
+<li><p><strong>DEMA Filter</strong>:</p></li>
+</ul>
+<p><span class="math inline">   </span>
+这个不会，他妈的到底为什么线性模型的 y 截距是 <span
+class="math inline">$(2\hat{x} - \hat{\hat{x}})$</span> 啊？？？
+特意去翻了 1961
+年布朗平滑的论文，原作者直接注意到，行我瞎，我注意力涣散，算你牛逼🤡。线性模型的效果也太好了…回学校拿草纸算一下再说吧。</p>
+<ul>
+<li><strong>Adam Filter</strong>:</li>
+</ul>
+<p><span class="math inline">   </span> Adam
+则是利用指数滤波平滑预测数据的一阶矩(<span
+class="math inline"><em>E</em><em>X</em></span>)与二阶矩(<span
+class="math inline"><em>D</em><em>X</em></span>)，使用平滑后的矩作为先验信息进行回归分析计算出本次的预测值；再使用观测值的残差对矩进行更新并利用梯度下降对预测值进行矫正。</p>
+<p>其实即使频域性能好的滤波器 (FIR、IIR) 也可以用这种思想来看待
+(从数电的角度看的话：
+（抑制噪声=&gt;抑制高频成分=&gt;单一点不可能有频率信息=&gt;保存之前的点）得，从组合逻辑变成时序逻辑了，而寄存器存储的就是先验信息)
+。但是不同的是大多数信号处理的教材都是面向电子信息工程的学生，这些人更在意如何在上帝视角去更好的处理整个信号(在意频域性能，比如如何处理一首歌曲的音频信息)；但我们却很在意实时性(时域性能，总不能让传感器先运行一遍记录好信号再来处理吧？新概念刻舟求剑？)。在性能选择上的分歧，致使我们几乎不会同时选用两类滤波器。<del>(你问我为啥同时学，答曰：我是电气工程的，姥姥(电信)不亲舅舅(自动化)不爱，自己学完才知道技能树点歪了🤕)</del></p>
+<p>从本节开始，我们将会将系统模型引入滤波器，从而进一步提升滤波器性能。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 采样参数</span></span><br><span class="line">SampleFre = <span class="number">10</span></span><br><span class="line">TotalTime = <span class="number">10</span>          <span class="comment"># 采样时间 不推荐大于10, 增加点数请增大采样率</span></span><br><span class="line">Step = <span class="number">1</span>/SampleFre</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型参数</span></span><br><span class="line">Model_accel = <span class="number">2</span></span><br><span class="line">Model_initialSpeed = <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### 仿真 ###</span></span><br><span class="line">ModelValue, ActualValue, MeasureValue = UserLib.Model.Generative(Step, TotalTime, <span class="keyword">lambda</span> x: Model_accel * x + Model_initialSpeed)</span><br></pre></td></tr></table></figure>
+<h2 id="系统建模">2 系统建模</h2>
+<h2 id="仿真建模">2.1 仿真建模</h2>
+<p>我们依然采用匀速运动模型，只不过这次使用 lambda
+表达式将模型传入封装好的生成函数。现在来好好看看我们的仿真模型都有什么吧。
+&gt; <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">lambda</span> x: Model_accel * x + Model_initialSpeed</span><br></pre></td></tr></table></figure></p>
+<p>由微分学基本常识可知，当 <span
+class="math inline"><em>d</em><em>t</em> → 0</span> 时, 若函数可微则
+<span class="math inline"><em>d</em><em>y</em></span>
+为线性主部。这告诉我们，只要采样率够高，一切模型都是线性的<del>力大砖飞</del>。但是现实情况不可能是完美的线性模型，所以这里用泰勒多项式的二阶、三阶项
+<span
+class="math inline">(0.0317*<em>x</em>**2) − (0.00223*<em>x</em>**3)</span>,
+来模拟模型的非线性。而项 <span
+class="math inline">(0.312*(<em>n</em><em>p</em>.<em>s</em><em>i</em><em>n</em>(<em>n</em><em>p</em>.<em>p</em><em>i</em>*<em>x</em>)+<em>n</em><em>p</em>.<em>s</em><em>i</em><em>n</em>(6*<em>n</em><em>p</em>.<em>p</em><em>i</em>*<em>x</em>)+<em>n</em><em>p</em>.<em>s</em><em>i</em><em>n</em>(12*<em>n</em><em>p</em>.<em>p</em><em>i</em>*<em>x</em>)))</span>
+则模拟某种外因导致的系统固有震荡，比如说小车轴承安装不共轴之类的。 &gt;
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">temp += (<span class="number">0.0317</span> * x**<span class="number">2</span>) - (<span class="number">0.00223</span> * x**<span class="number">3</span>) </span><br><span class="line">     + (<span class="number">0.312</span> * (np.sin(np.pi*x) + np.sin(<span class="number">6</span>*np.pi*x) + np.sin(<span class="number">12</span>*np.pi*x)))</span><br></pre></td></tr></table></figure></p>
+<p>当在时间中段，给予一个阶<del>蹲</del>跃信号，模拟突然刹车或撞击产生的瞬间变化。</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> x &gt; totalTime/<span class="number">2</span>:</span><br><span class="line">    temp -= model_func(totalTime/<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>最后再使用 <span class="math inline"><em>N</em>(0，0.2)</span>
+来表征过程噪声，比如地面的崎岖；和标准正态分布 <span
+class="math inline"><em>N</em>(0，1)</span> 来表征测量噪声。</p>
+<h2 id="预测建模">2.2 预测建模</h2>
+<p>使用简单的运动学方程来写出时刻 n 到 n+1
+递推关系式。(这里也推荐将导数符号从 <span
+class="math inline"><em>v</em>′</span> 改成 <span
+class="math inline"><em>v̇</em></span>
+,为啥？真幸运，看来你还没见过写四个角标的符号，到时候就知道为啥要把导数符号放到头顶里了😭)
+<span class="math display">$$
+\begin{align}
+   \nonumber    v_{n+1} &amp;= v_{n} + \Delta t \dot{v}_{n} \\
+   \nonumber    \dot{v}_{n} &amp;= \dot{v}_{n}
+\end{align}
+$$</span></p>
+<p>让我们写的更简洁一点</p>
+<p><span class="math display">$$
+    \begin{bmatrix}
+    {v}_{n+1} \\ \dot{v}_{n+1}  
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    1 &amp; \Delta t\\
+    0 &amp; 1
+    \end{bmatrix}
+    \begin{bmatrix}
+    {v}_{n} \\ \dot{v}_{n}  
+    \end{bmatrix}
+$$</span></p>
+<p>其中向量 <span class="math inline">$\begin{bmatrix} {v}_{n} \\
+\dot{v}_{n} \end{bmatrix}$</span>
+是我们对被控对象(plant)所感兴趣的物理量, 称之为状态变量(state)。</p>
+<p>好，现在我们就可以根据上一时刻的系统状态从而猜出本时刻系统的状态了(先验信息)。然后像之前的那些滤波器一样，通过某种比例来将先验信息与后验信息(测量值)结合在一起。</p>
+<p><span
+class="math display"><code>e</code><code>s</code><code>t</code><code>i</code><code>m</code><code>a</code><code>t</code><code>e</code> = (1−<em>α</em>) ⋅ <code>p</code><code>r</code><code>e</code><code>d</code><code>i</code><code>c</code><code>t</code><code>i</code><code>o</code><code>n</code> + <em>α</em> ⋅ <code>m</code><code>e</code><code>a</code><code>s</code><code>u</code><code>r</code><code>e</code><code>m</code><code>e</code><code>n</code><code>t</code></span></p>
+<p>根据刚刚的思路实现滤波器。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TestFilter</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, alpha, dot, init</span>):</span><br><span class="line">        <span class="variable language_">self</span>.alpha = alpha</span><br><span class="line">        <span class="variable language_">self</span>.dot = dot</span><br><span class="line">        <span class="variable language_">self</span>.estimate = init</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, measurement, dt</span>):</span><br><span class="line">        <span class="comment"># 预测步</span></span><br><span class="line">        prediction = <span class="variable language_">self</span>.estimate + <span class="variable language_">self</span>.dot * dt</span><br><span class="line">        <span class="variable language_">self</span>.dot = <span class="variable language_">self</span>.dot</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 数据融合(贝叶斯)</span></span><br><span class="line">        <span class="variable language_">self</span>.estimate = (<span class="number">1</span> - <span class="variable language_">self</span>.alpha) * prediction + <span class="variable language_">self</span>.alpha * measurement</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.estimate</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">refilter</span>(<span class="params">self, Measurement_sequence, dt</span>):</span><br><span class="line">        filter_sequence = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(Measurement_sequence)):</span><br><span class="line">            filter_sequence.append(<span class="variable language_">self</span>.update(Measurement_sequence[i], dt))</span><br><span class="line">        <span class="keyword">return</span> filter_sequence</span><br></pre></td></tr></table></figure>
+<p>漂亮，赶紧来试试效果</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">filter</span> = TestFilter(<span class="number">0.5</span>, Model_accel, Model_initialSpeed)</span><br><span class="line">FilterValue = <span class="built_in">filter</span>.refilter(MeasureValue, Step)</span><br><span class="line"></span><br><span class="line"><span class="comment">### 绘图展示 ###</span></span><br><span class="line">plt.figure(figsize=(<span class="number">25</span>, <span class="number">5</span>))</span><br><span class="line">plt.plot(ModelValue, 	<span class="string">&#x27;.-&#x27;</span>, label=<span class="string">&quot;Model&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.plot(ActualValue, 	<span class="string">&#x27;*-&#x27;</span>, label=<span class="string">&quot;Actual&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.plot(MeasureValue, 	<span class="string">&#x27;-&#x27;</span>, label=<span class="string">&quot;Measure&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.plot(FilterValue, 	<span class="string">&#x27;o-&#x27;</span>, label=<span class="string">&quot;Filter&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;lower right&#x27;</span>) <span class="comment">#绘制图例</span></span><br><span class="line"></span><br><span class="line">FP.FilterPerformance.analysis(FilterValue, MeasureValue, ActualValue)</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="pic/2_2.g-h%20Filter_files/2_2.g-h%20Filter_8_0.png"
+alt="png" />
+<figcaption aria-hidden="true">png</figcaption>
+</figure>
+<figure>
+<img src="pic/2_2.g-h%20Filter_files/2_2.g-h%20Filter_8_1.png"
+alt="png" />
+<figcaption aria-hidden="true">png</figcaption>
+</figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bias0    = []</span><br><span class="line">bias1    = []</span><br><span class="line">redratio = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">100</span>, <span class="number">1</span>):</span><br><span class="line">    <span class="built_in">filter</span> = TestFilter(i/<span class="number">100</span>, Model_accel, Model_initialSpeed)</span><br><span class="line">    FilterValue = <span class="built_in">filter</span>.refilter(MeasureValue, Step)</span><br><span class="line">    bias0.append(np.mean(<span class="built_in">abs</span>(np.array(MeasureValue) - np.array(ActualValue))))</span><br><span class="line">    bias1.append(np.mean(<span class="built_in">abs</span>(np.array(FilterValue) - np.array(ActualValue))))</span><br><span class="line">    redratio.append(<span class="number">1</span> - bias1[-<span class="number">1</span>] / bias0[-<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">fig = plt.figure(figsize=figsize)</span><br><span class="line">ax = fig.add_subplot(<span class="number">111</span>)</span><br><span class="line">ax.plot([i/<span class="number">100</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, bias1.__len__() + <span class="number">1</span>, <span class="number">1</span>)], bias1, <span class="string">&#x27;-o&#x27;</span>, label=<span class="string">&quot;Mean abs bias&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">ax.legend(loc=<span class="string">&#x27;lower left&#x27;</span>)</span><br><span class="line"></span><br><span class="line">ax2 = ax.twinx()</span><br><span class="line">ax2.plot([i/<span class="number">100</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, redratio.__len__() + <span class="number">1</span>, <span class="number">1</span>)],redratio, <span class="string">&#x27;-ob&#x27;</span>, label=<span class="string">&quot;Reduction ratio&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">ax2.legend(loc=<span class="string">&#x27;lower right&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.suptitle(<span class="string">f&#x27;Max average deviation reduction ratio:<span class="subst">&#123;np.array(redratio).<span class="built_in">max</span>()*<span class="number">100</span>:<span class="number">.3</span>f&#125;</span>% at <span class="subst">&#123;(np.array(redratio).argmax() + <span class="number">1</span>)/<span class="number">100</span>&#125;</span>&#x27;</span>)</span><br><span class="line">plt.plot(np.array(redratio).argmax()/<span class="number">100</span> , np.array(redratio).<span class="built_in">max</span>(), <span class="string">&#x27;*g&#x27;</span>, markersize=<span class="number">10</span>)</span><br><span class="line">plt.axhline(np.array(redratio).<span class="built_in">max</span>(), color=<span class="string">&#x27;r&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<pre><code>&lt;matplotlib.lines.Line2D at 0x7763739bade0&gt;</code></pre>
+<figure>
+<img src="pic/2_2.g-h%20Filter_files/2_2.g-h%20Filter_9_1.png"
+alt="png" />
+<figcaption aria-hidden="true">png</figcaption>
+</figure>
+<p>效果相当不错对吧!但是从误差分段图中可以发现,
+滤波器对突变的响应很类似于 EMA 的响应;
+又或者当模型不准确时(比如斜率取相反数，ɑ取0.1)，滤波器有非常大的滞后性。<br />
+这肯定是我们不想见到的，比如说我们的小车速度闭环控制系统已经让发动机以最大功率开始工作了，刚开始非常符合我们的加速度的期待，但随着速度增大，空气阻力使加速度不断下降但发动机的功率无法继续提高(偏离了期望的模型),此时发生速度波动我们就无法高效的观测。<br />
+怎么办呢？</p>
+<h2 id="更新模型">2.3 更新模型</h2>
+<p>假如模型很完美的工作一段时间之后，由于某些影响模型不再准确了那么我们该怎么办呢？emmmm
+那就想办法更新模型呗。 (啥？你说更加相信测量值，想办法修改 <span
+class="math inline"><em>α</em></span>?
+跑偏了，麻溜回来。那叫卡尔曼滤波器，是下节的内容😋)<br />
+不妨把我们手上拥有的信息列出来: <span
+class="math inline"><em>v̂</em>, <em>v̇</em>, <em>d</em><em>t</em></span>
+再加上本次测量值 Z
+。如果从稳态进入暂态的话会有什么样子的特征呢？不妨看看上面的误差图。很显然突变发生时误差会有一个极大的尖峰。或者换一种说法，当我们的先验信息不再准确时，依赖模型的”惯性”会使预测值与测量值产生一个极大的误差。<br />
+更进一步的说，我们可以使用残差(我习惯将残差的绝对值称为误差)来对 <span
+class="math inline"><em>v̇</em></span> 进行某种更新。接下来看我表演<br />
+<span class="math display">$$
+\begin{align}
+    \nonumber       \mathtt{estimate} &amp;= (1 - \alpha) \cdot
+\mathtt{prediction} + \alpha \cdot \mathtt{measurement}\\
+                    \hat{v}_{n,n} &amp;= (1 - \alpha) \cdot
+\hat{v}_{n,n-1} + \alpha \cdot z_n\\
+    \nonumber       \hat{v}_{n,n} - \hat{v}_{n,n-1} &amp;= (1 - \alpha
+-1) \cdot \hat{v}_{n,n-1} + \alpha \cdot z_n\\
+    \nonumber       (\hat{v}_{n,n} - \hat{v}_{n-1,n-1})-
+(\hat{v}_{n,n-1} - \hat{v}_{n-1,n-1}) &amp;=  \alpha \cdot (z_n -
+\hat{v}_{n,n-1}) \\
+                    \hat{\dot{v}}_{n,n} - \hat{\dot{v}}_{n,n-1} &amp;=
+\alpha \cdot \frac {(z_n - \hat{v}_{n,n-1})}{dt} \\
+\end{align}
+$$</span> (1) 和 (2)
+即是我们的状态更新方差，推导过程中为了表示逻辑的连续性并没有更改参数符号。但是可以明显注意到这里的融合参数不应该选择相同的，因为我们传感器直接测量的是速度，融合速度时参数与传感器的精确度有关；而更新加速度时只与精密度有关。</p>
+<blockquote>
+<ul>
+<li>正确度 (correctness of measurement):
+指测量结果与真值的偏离程度，表征了系统误差的大小。(数据是否有偏)<br />
+</li>
+<li>精密度 (precision of measurement):
+测量读数重复一致的程度，表征了随机误差的大小。(数据散布情况)<br />
+</li>
+<li>精确度 (accuracy of measurement):
+指测量结果与真值符合一致的程度，表征系统误差和随机误差的综合大小。<br />
+
+<p align="right">
+————《电气测量》第一章
+</p>
+所以让你们好好学课内知识嘛，思想远比得分更重要</li>
+</ul>
+</blockquote>
+<p>整理一下，写出方程组</p>
+<p><span class="math display">$$
+\left\{
+    \begin{matrix}
+        \begin{align}
+            \nonumber   \hat{v}_{n,n} &amp;= \hat{v}_{n,n-1} + \alpha
+\cdot (z_n - \hat{v}_{n,n-1})\\
+            \nonumber   \hat{\dot{v}}_{n,n} &amp;= \hat{\dot{v}}_{n,n-1}
++ \beta \cdot \frac {(z_n - \hat{v}_{n,n-1})}{dt} \\
+        \end{align}
+    \end{matrix}
+\right.
+$$</span></p>
+<p>现在可以写出完整版的 g-h 滤波器了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ghFilter</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, alpha, beta, dot, init</span>):</span><br><span class="line">        <span class="variable language_">self</span>.alpha = alpha</span><br><span class="line">        <span class="variable language_">self</span>.beta = beta</span><br><span class="line">        <span class="variable language_">self</span>.dot = dot</span><br><span class="line">        <span class="variable language_">self</span>.estimate = init</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, measurement, dt</span>):</span><br><span class="line">        <span class="comment"># 预测步</span></span><br><span class="line">        prediction = <span class="variable language_">self</span>.estimate + <span class="variable language_">self</span>.dot * dt</span><br><span class="line">        <span class="variable language_">self</span>.dot = <span class="variable language_">self</span>.dot</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 更新步</span></span><br><span class="line">        residual = measurement - prediction</span><br><span class="line">        <span class="variable language_">self</span>.dot = <span class="variable language_">self</span>.dot + <span class="variable language_">self</span>.beta * (residual) / dt</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 数据融合(贝叶斯)</span></span><br><span class="line">        <span class="variable language_">self</span>.estimate = (<span class="number">1</span> - <span class="variable language_">self</span>.alpha) * prediction + <span class="variable language_">self</span>.alpha * measurement</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.estimate</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">refilter</span>(<span class="params">self, Measurement_sequence, dt</span>):</span><br><span class="line">        filter_sequence = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(Measurement_sequence)):</span><br><span class="line">            filter_sequence.append(<span class="variable language_">self</span>.update(Measurement_sequence[i], dt))</span><br><span class="line">        <span class="keyword">return</span> filter_sequence</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">filter</span> = ghFilter(<span class="number">0.478</span>, <span class="number">0.002</span>, Model_accel, Model_initialSpeed)</span><br><span class="line">FilterValue = <span class="built_in">filter</span>.refilter(MeasureValue, Step)</span><br><span class="line"></span><br><span class="line"><span class="comment">### 绘图展示 ###</span></span><br><span class="line">plt.figure(figsize=(<span class="number">25</span>, <span class="number">5</span>))</span><br><span class="line">plt.plot(ModelValue, 	<span class="string">&#x27;.-&#x27;</span>, label=<span class="string">&quot;Model&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.plot(ActualValue, 	<span class="string">&#x27;*-&#x27;</span>, label=<span class="string">&quot;Actual&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.plot(MeasureValue, 	<span class="string">&#x27;-&#x27;</span>, label=<span class="string">&quot;Measure&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.plot(FilterValue, 	<span class="string">&#x27;o-&#x27;</span>, label=<span class="string">&quot;Filter&quot;</span>, markersize=<span class="number">5</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;lower right&#x27;</span>) <span class="comment">#绘制图例</span></span><br><span class="line"></span><br><span class="line">FP.FilterPerformance.analysis(FilterValue, MeasureValue, ActualValue)</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="pic/2_2.g-h%20Filter_files/2_2.g-h%20Filter_13_0.png"
+alt="png" />
+<figcaption aria-hidden="true">png</figcaption>
+</figure>
+<figure>
+<img src="pic/2_2.g-h%20Filter_files/2_2.g-h%20Filter_13_1.png"
+alt="png" />
+<figcaption aria-hidden="true">png</figcaption>
+</figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">bias0    = []</span><br><span class="line">bias1    = []</span><br><span class="line"></span><br><span class="line">searchSize = <span class="number">100</span></span><br><span class="line">x = np.outer(np.linspace(<span class="number">0</span>, <span class="number">1</span>, searchSize), np.ones(searchSize))</span><br><span class="line">y = x.copy().T</span><br><span class="line">z = np.zeros((searchSize, searchSize))</span><br><span class="line">zmax = []</span><br><span class="line">zmaxindex = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, searchSize, <span class="number">1</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, searchSize, <span class="number">1</span>):</span><br><span class="line">        <span class="built_in">filter</span> = ghFilter(i/searchSize, j/searchSize, Model_accel, Model_initialSpeed)</span><br><span class="line">        FilterValue = <span class="built_in">filter</span>.refilter(MeasureValue, Step)</span><br><span class="line">        bias0 = np.mean(<span class="built_in">abs</span>(np.array(MeasureValue) - np.array(ActualValue)))</span><br><span class="line">        bias1 = np.mean(<span class="built_in">abs</span>(np.array(FilterValue) - np.array(ActualValue)))</span><br><span class="line">        <span class="keyword">if</span> (<span class="number">1</span> - (bias1 / bias0)) &lt; <span class="number">0</span>:</span><br><span class="line">            z[i][j] = <span class="number">0</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            z[i][j] = (<span class="number">1</span> - (bias1 / bias0))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        zmax.append(z.<span class="built_in">max</span>())</span><br><span class="line">        zmaxindex.append([i, j])</span><br><span class="line"></span><br><span class="line">a = np.array(zmaxindex[zmax.index(<span class="built_in">max</span>(zmax))])</span><br><span class="line">z2 = np.zeros((searchSize, searchSize))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">int</span>((a[<span class="number">0</span>] - <span class="number">5</span>)*np.sqrt(searchSize)), <span class="built_in">int</span>((a[<span class="number">0</span>] + <span class="number">5</span>)*np.sqrt(searchSize)), <span class="number">1</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">int</span>((a[<span class="number">1</span>] - <span class="number">5</span>)*np.sqrt(searchSize)), <span class="built_in">int</span>((a[<span class="number">1</span>] + <span class="number">5</span>)*np.sqrt(searchSize)), <span class="number">1</span>):</span><br><span class="line">        <span class="built_in">filter</span> = ghFilter(i/searchSize ** <span class="number">1.5</span>, j/searchSize ** <span class="number">1.5</span>, Model_accel, Model_initialSpeed)</span><br><span class="line">        FilterValue = <span class="built_in">filter</span>.refilter(MeasureValue, Step)</span><br><span class="line">        bias0 = np.mean(<span class="built_in">abs</span>(np.array(MeasureValue) - np.array(ActualValue)))</span><br><span class="line">        bias1 = np.mean(<span class="built_in">abs</span>(np.array(FilterValue) - np.array(ActualValue)))</span><br><span class="line">        zmax.append(z2.<span class="built_in">max</span>())</span><br><span class="line">        zmaxindex.append([i, j])</span><br><span class="line">        </span><br><span class="line">a = np.array(zmaxindex[zmax.index(<span class="built_in">max</span>(zmax))])</span><br><span class="line"></span><br><span class="line">fig = plt.figure(figsize=(<span class="number">20</span>, <span class="number">10</span>))</span><br><span class="line">ax = plt.axes(projection=<span class="string">&#x27;3d&#x27;</span>)</span><br><span class="line">ax.plot_surface(x, y, z)</span><br><span class="line">ax.set_xlabel(<span class="string">&#x27;alpha&#x27;</span>)</span><br><span class="line">ax.set_ylabel(<span class="string">&#x27;beta&#x27;</span>)</span><br><span class="line">ax.set_zlabel(<span class="string">&#x27;max average deviation reduction ratio&#x27;</span>)</span><br><span class="line">ax.set_zlim(<span class="number">0</span>,<span class="number">1</span>)</span><br><span class="line">plt.suptitle(<span class="string">f&#x27;Max average deviation reduction ratio:<span class="subst">&#123;np.array(zmax).<span class="built_in">max</span>()*<span class="number">100</span>:<span class="number">.3</span>f&#125;</span>% at <span class="subst">&#123;a/<span class="number">1000</span>&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line">ax.contour(x, y, z, [i/<span class="number">100</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">int</span>(np.array(zmax).<span class="built_in">max</span>()*<span class="number">100</span>), <span class="number">1</span>)], cmap=<span class="string">&#x27;jet&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="参考文献">参考文献</h2>
+<p><a
+target="_blank" rel="noopener" href="https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python">Kalman
+and Bayesian Filters in Python</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://reglucis.github.io">Reglucis</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://reglucis.github.io/2025/09/01/2_2.g-h%20Filter/">https://reglucis.github.io/2025/09/01/2_2.g-h%20Filter/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://reglucis.github.io" target="_blank">Reglucis 的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%BB%A4%E6%B3%A2%E5%99%A8/">滤波器</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post-share"><div class="social-share" data-image="/img/myauther.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/09/01/2_3.1-D%20Kalman%20FIlter/" title="贝叶斯滤波器系列(5) - 一维卡尔曼滤波"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">贝叶斯滤波器系列(5) - 一维卡尔曼滤波</div></div><div class="info-2"><div class="info-item-1">Kalman Filter 12345678# %matplotlib widgetimport matplotlib.pyplot as pltimport numpy as npimport MyFilter.FilterPerformance as FPimport MyFilter.UserLib as UserLibimport MyFilter.BayesFilter as BayesFilterfigsize=(25, 5) 1 引言 The game is on. 最开始的时候，我们直接使用上一时刻的信息作为本时刻的先验信息(MA); 再后来我们将上一时刻的信息通过模型预测出本时刻的信息，进而使用预测与测量的残差来对模型进行更新。总之，我们使用各种各样的的方法来尽可能提取测量的全部信息。 但这里其实有个问题，在预测/观测时获得的信息我们都认为其是一个一般变量，而非随机变量。这种方法其实丢掉了一些信息(方差)，而卡尔曼滤波器则将这些信息考虑了进来。 1234567891011# 采样参数SampleFre = 10TotalTime = 10          # ...</div></div></div></a><a class="pagination-related" href="/2025/09/01/2_1.%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AD%A6%E6%B4%BE/" title="贝叶斯滤波器系列(3) - 贝叶斯学派"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">贝叶斯滤波器系列(3) - 贝叶斯学派</div></div><div class="info-2"><div class="info-item-1">贝叶斯学派 1 引言  概率论只不过是把常识用数学公式表达了出来。  ————拉普拉斯                   2 贝叶斯定理（Bayes Theorem） 2.1 例子 先来做个有奖竞猜： &gt; Steve 非常害羞而且性格孤僻，虽然总是乐于助人，但对周围的人或现实世界几乎不感兴趣，他是一个温顺而又井井有条（meek and tidy）的人，需要事情有条理且结构清晰，并乐于钻研细节。 &gt; 请问 “Steve 是个图书管理员” 和 “Steve 是个农民” 这两种说法哪种可能性更大？ 5 4 3 2 1 这个例子是心理学家、诺贝尔经济学奖获得者 Daniel Kahneman 和 Amos Tversky 发表于《Science》上的文章《Judgment under Uncertainty: Heuristics and Biases》的例子(飘了，都敢读《science》了，也是好起来了)。根据 Kahneman 和 Tversky 的实验结果，当人们知道 Steve 是“一个温顺而又井井有条的人”后，大多数人都会说他更有可能是图书馆管理员，毕竟与农民相...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/09/01/0_1.Hallo%20Filter/" title="贝叶斯滤波器系列(1) - Hello Filter"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-01</div><div class="info-item-2">贝叶斯滤波器系列(1) - Hello Filter</div></div><div class="info-2"><div class="info-item-1">Hallo Filter 1234567import numpy as npfrom scipy import statsimport matplotlib.pyplot as plt# %matplotlib ipympl# %matplotlib widgetfigsize=(20, 5) 1 噪声的数学模型 先来回想一下，小学数学里测量一个物体的长度、重量巴拉巴拉等物理量时为了减小误差的方法是————多次测量取平均值。 所以多次测量取平均值是怎么减小误差的呢？ 1.1 噪声建模 中心极限定理告诉我们: 只要随机变量相互独立，每个随机变量对和的影响都是微小的，哪怕它们的分布类型不同，其和标准化后都有标准正态的极限分布。话句话说，某一事件受到许多相互独立且微小的随机因素影响，总的影响就可以看作服从或近似服从正态分布。 不妨来仿真一下，下述代码测试计算了 50000 次随机事件，每次随机事件均为 100 次平均分布的随机变量之和。 12345678910111213141516import math# 绘制标准正态分布曲线u = 0sig = math.sqrt(1)x = np...</div></div></div></a><a class="pagination-related" href="/2025/09/01/1_1.%E6%BB%91%E5%8A%A8%E6%BB%A4%E6%B3%A2/" title="贝叶斯滤波器系列(2) - 滑动滤波"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-01</div><div class="info-item-2">贝叶斯滤波器系列(2) - 滑动滤波</div></div><div class="info-2"><div class="info-item-1">1 滑动滤波 12345678# %matplotlib widgetimport matplotlib.pyplot as pltimport numpy as npimport MyFilter.MovingAverageFilter as MAFimport MyFilter.FilterPerformance as FPimport MyFilter.UserLib as UserLibfigsize=(25, 5) 在第一节中，我们讨论了对于静态目标的测量噪声的抑制方法。我们认为测量过程中的所有信息都是有效且平权的，所以采取的最直接的方法————累计平均（Cumulative Average）。但实际应用中，我们往往面对着动态过程的测量，比如测量一辆匀加速运动中小车的实时速度。这种情况下，使用累计平均来进行滤波显然是不可靠的。Why？ 1. 从数学模型上来说，CA滤波器在对系统建模时认为其是完全不变的 ————&gt; 同一滤波器对不同模型的所表现出的性能是不同的。 2. 从性能分析上来说，滤波器的性能可以分为静态性能(对噪声的抑制能力)与动态性能(对真值变化的跟踪能力...</div></div></div></a><a class="pagination-related" href="/2025/09/01/2_3.1-D%20Kalman%20FIlter/" title="贝叶斯滤波器系列(5) - 一维卡尔曼滤波"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-01</div><div class="info-item-2">贝叶斯滤波器系列(5) - 一维卡尔曼滤波</div></div><div class="info-2"><div class="info-item-1">Kalman Filter 12345678# %matplotlib widgetimport matplotlib.pyplot as pltimport numpy as npimport MyFilter.FilterPerformance as FPimport MyFilter.UserLib as UserLibimport MyFilter.BayesFilter as BayesFilterfigsize=(25, 5) 1 引言 The game is on. 最开始的时候，我们直接使用上一时刻的信息作为本时刻的先验信息(MA); 再后来我们将上一时刻的信息通过模型预测出本时刻的信息，进而使用预测与测量的残差来对模型进行更新。总之，我们使用各种各样的的方法来尽可能提取测量的全部信息。 但这里其实有个问题，在预测/观测时获得的信息我们都认为其是一个一般变量，而非随机变量。这种方法其实丢掉了一些信息(方差)，而卡尔曼滤波器则将这些信息考虑了进来。 1234567891011# 采样参数SampleFre = 10TotalTime = 10          # ...</div></div></div></a><a class="pagination-related" href="/2025/09/01/2_1.%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AD%A6%E6%B4%BE/" title="贝叶斯滤波器系列(3) - 贝叶斯学派"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-01</div><div class="info-item-2">贝叶斯滤波器系列(3) - 贝叶斯学派</div></div><div class="info-2"><div class="info-item-1">贝叶斯学派 1 引言  概率论只不过是把常识用数学公式表达了出来。  ————拉普拉斯                   2 贝叶斯定理（Bayes Theorem） 2.1 例子 先来做个有奖竞猜： &gt; Steve 非常害羞而且性格孤僻，虽然总是乐于助人，但对周围的人或现实世界几乎不感兴趣，他是一个温顺而又井井有条（meek and tidy）的人，需要事情有条理且结构清晰，并乐于钻研细节。 &gt; 请问 “Steve 是个图书管理员” 和 “Steve 是个农民” 这两种说法哪种可能性更大？ 5 4 3 2 1 这个例子是心理学家、诺贝尔经济学奖获得者 Daniel Kahneman 和 Amos Tversky 发表于《Science》上的文章《Judgment under Uncertainty: Heuristics and Biases》的例子(飘了，都敢读《science》了，也是好起来了)。根据 Kahneman 和 Tversky 的实验结果，当人们知道 Steve 是“一个温顺而又井井有条的人”后，大多数人都会说他更有可能是图书馆管理员，毕竟与农民相...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/myauther.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Reglucis</div><div class="author-info-description">一只努力学习的菜猪</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Reglucis"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Reglucis" target="_blank" title="Github"><i class="fab fa-github" style="color: #hdhfbb;"></i></a><a class="social-icon" href="/Reglucis@outlook.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #000000;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来访我的博客。这里记录着菜猪的学习日志。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#g-h-%E6%BB%A4%E6%B3%A2%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">g-h 滤波器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">1 引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.2.</span> <span class="toc-text">2 系统建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BF%E7%9C%9F%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.3.</span> <span class="toc-text">2.1 仿真建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B%E5%BB%BA%E6%A8%A1"><span class="toc-number">1.4.</span> <span class="toc-text">2.2 预测建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.5.</span> <span class="toc-text">2.3 更新模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">1.6.</span> <span class="toc-text">参考文献</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/2_3.1-D%20Kalman%20FIlter/" title="贝叶斯滤波器系列(5) - 一维卡尔曼滤波">贝叶斯滤波器系列(5) - 一维卡尔曼滤波</a><time datetime="2025-09-01T13:48:45.000Z" title="发表于 2025-09-01 21:48:45">2025-09-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/2_2.g-h%20Filter/" title="贝叶斯滤波器系列(4) - G-H 滤波器">贝叶斯滤波器系列(4) - G-H 滤波器</a><time datetime="2025-09-01T13:48:44.000Z" title="发表于 2025-09-01 21:48:44">2025-09-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/2_1.%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AD%A6%E6%B4%BE/" title="贝叶斯滤波器系列(3) - 贝叶斯学派">贝叶斯滤波器系列(3) - 贝叶斯学派</a><time datetime="2025-09-01T13:48:43.000Z" title="发表于 2025-09-01 21:48:43">2025-09-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/1_1.%E6%BB%91%E5%8A%A8%E6%BB%A4%E6%B3%A2/" title="贝叶斯滤波器系列(2) - 滑动滤波">贝叶斯滤波器系列(2) - 滑动滤波</a><time datetime="2025-09-01T13:48:42.000Z" title="发表于 2025-09-01 21:48:42">2025-09-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/0_1.Hallo%20Filter/" title="贝叶斯滤波器系列(1) - Hello Filter">贝叶斯滤波器系列(1) - Hello Filter</a><time datetime="2025-09-01T13:48:41.000Z" title="发表于 2025-09-01 21:48:41">2025-09-01</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://w.wallhaven.cc/full/1p/wallhaven-1prrw9.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By Reglucis</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
