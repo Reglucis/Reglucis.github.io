@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>WSL常见指令 | Reglucis 的博客</title><meta name="author" content="Reglucis"><meta name="copyright" content="Reglucis"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1. 安装 Linux 发行版 1.1 官方发行版 列出可用发行版 1wsl --list --online 安装指定发行版 1wsl --install [Distro] 1.2 任意发行版 WSL 可以使用 tar 文件导入任意 Linux 发行版。 1.2.1 获取 tar 文件 自行获取要导入的 tar 文件, 本例使用从容器中导出的方法。(CentOS 可从官网直接下载) 1.2.2 导">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WSL常见指令">
+<meta property="og:url" content="https://reglucis.github.io/2025/09/04/WSL/index.html">
+<meta property="og:site_name" content="Reglucis 的博客">
+<meta property="og:description" content="1. 安装 Linux 发行版 1.1 官方发行版 列出可用发行版 1wsl --list --online 安装指定发行版 1wsl --install [Distro] 1.2 任意发行版 WSL 可以使用 tar 文件导入任意 Linux 发行版。 1.2.1 获取 tar 文件 自行获取要导入的 tar 文件, 本例使用从容器中导出的方法。(CentOS 可从官网直接下载) 1.2.2 导">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://reglucis.github.io/img/myauther.jpg">
+<meta property="article:published_time" content="2025-09-04T11:47:46.000Z">
+<meta property="article:modified_time" content="2025-09-04T12:35:10.253Z">
+<meta property="article:author" content="Reglucis">
+<meta property="article:tag" content="WSL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://reglucis.github.io/img/myauther.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "WSL常见指令",
+  "url": "https://reglucis.github.io/2025/09/04/WSL/",
+  "image": "https://reglucis.github.io/img/myauther.jpg",
+  "datePublished": "2025-09-04T11:47:46.000Z",
+  "dateModified": "2025-09-04T12:35:10.253Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Reglucis",
+      "url": "https://reglucis.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/myfavicon.jpg"><link rel="canonical" href="https://reglucis.github.io/2025/09/04/WSL/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'WSL常见指令',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(https://w.wallhaven.cc/full/qz/wallhaven-qzrmq7.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/myauther.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 友链</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://yin.nnneri.me/"><span> 小音理</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://w.wallhaven.cc/full/1p/wallhaven-1prrw9.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Reglucis 的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">WSL常见指令</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 友链</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://yin.nnneri.me/"><span> 小音理</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">WSL常见指令</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-04T11:47:46.000Z" title="发表于 2025-09-04 19:47:46">2025-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-04T12:35:10.253Z" title="更新于 2025-09-04 20:35:10">2025-09-04</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="安装-linux-发行版">1. 安装 Linux 发行版</h2>
+<h3 id="官方发行版">1.1 官方发行版</h3>
+<p>列出可用发行版 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --list --online</span><br></pre></td></tr></table></figure></p>
+<p>安装指定发行版 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --install [Distro]</span><br></pre></td></tr></table></figure></p>
+<h3 id="任意发行版">1.2 任意发行版</h3>
+<p>WSL 可以使用 tar 文件导入任意 Linux 发行版。</p>
+<h4 id="获取-tar-文件">1.2.1 获取 tar 文件</h4>
+<p>自行获取要导入的 tar 文件, 本例使用从容器中导出的方法。(CentOS
+可从官网直接下载)</p>
+<h4 id="导入-tar">1.2.2 导入 tar</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wsl --import &lt;Distro&gt; &lt;InstallLocation&gt; &lt;FileName&gt;</span><br><span class="line"><span class="comment"># 示例: wsl --import DevLinux ./DevLinux ./Ubuntu-24.04-Base</span></span><br></pre></td></tr></table></figure>
+<p><Distro>: 安装后该系统名称 <InstallLocation>: 要安装到的位置
+<FileName>: tar文件位置</p>
+<h2 id="退出关闭-wsl">2. 退出/关闭 WSL</h2>
+<p>快捷键 ctrl + d 注销当前用户。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止指定发行版</span></span><br><span class="line">wsl --terminate &lt;Distribution Name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭 WSL, 停止所有发行版</span></span><br><span class="line">wsl --shutdown</span><br></pre></td></tr></table></figure></p>
+<h2 id="常用指令">3. 常用指令</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在用户根目录启动(否则跟随当前目录)</span></span><br><span class="line">wsl ~                       </span><br><span class="line"><span class="comment"># 列出已安装的发行版</span></span><br><span class="line">wsl --list --verbose</span><br><span class="line"><span class="comment"># 设置默认发行版</span></span><br><span class="line">wsl --set-default &lt;Distro&gt;</span><br><span class="line"><span class="comment"># 启动指定发行版</span></span><br><span class="line">wsl -d &lt;Distro&gt;</span><br><span class="line"><span class="comment"># 以指定用户启动</span></span><br><span class="line">wsl -u &lt;UserName&gt;</span><br><span class="line"><span class="comment"># 注销或卸载 Linux 分发版</span></span><br><span class="line">wsl --unregister &lt;DistributionName&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="导出导入发行版">4. 导出/导入发行版</h2>
+<p>导出后多次导入的方式可以重复安装多个相同版本的微软商店发行版。
+该方法也可以实现对发行版的命名。 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wsl --<span class="built_in">export</span> &lt;Distribution Name&gt; &lt;FileName&gt;</span><br><span class="line">wsl --import &lt;Distribution Name&gt; &lt;InstallLocation&gt; &lt;FileName&gt;</span><br></pre></td></tr></table></figure></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://reglucis.github.io">Reglucis</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://reglucis.github.io/2025/09/04/WSL/">https://reglucis.github.io/2025/09/04/WSL/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://reglucis.github.io" target="_blank">Reglucis 的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/WSL/">WSL</a></div><div class="post-share"><div class="social-share" data-image="/img/myauther.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/09/02/%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6/" title="不可见字符"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">不可见字符</div></div><div class="info-2"><div class="info-item-1">第一行为用作大小参考的空格    不可见字符     [ ]   [⠀]   [　]    </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/31/%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E5%88%B6%E4%BD%9C/" title="虚拟磁盘创建与挂载"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-31</div><div class="info-item-2">虚拟磁盘创建与挂载</div></div><div class="info-2"><div class="info-item-1">环境：WSL-Ubuntu 24.04 LTS 1. 创建空文件 执行下述命令将在工作目录下创建一个大小为 SIZE[Mb] 空文件 1dd if=/dev/zero of=&lt;filename&gt; bs=1024 count=SIZE 2. 格式化映像文件 123sudo apt install dosfstools 	#安装 fat 的格式化工具mkfs.vfat &lt;filename&gt; 			#格式化该文件为 fat 文件系统mount -o loop &lt;filename&gt; /mnt 	#挂载文件 如果出现类似错误： mount: /mnt/sdcard/: failed to setup loop device for /home/reglucis/project/YueShell/Middleware/VirtualFlash/sdcard.vfs. 记得 sudo……😓 3. 使用 现在应该就可以在 /mnt 文件夹访问这一虚拟磁盘了，也可以通过 windows 的文件资源管理器访问。 代码层面则可以使用 virtualDisk + F...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/myauther.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Reglucis</div><div class="author-info-description">一只努力学习的菜猪</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Reglucis"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Reglucis" target="_blank" title="Github"><i class="fab fa-github" style="color: #hdhfbb;"></i></a><a class="social-icon" href="/Reglucis@outlook.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #000000;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来访我的博客。这里记录着菜猪的学习日志。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-linux-%E5%8F%91%E8%A1%8C%E7%89%88"><span class="toc-number">1.</span> <span class="toc-text">1. 安装 Linux 发行版</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%98%E6%96%B9%E5%8F%91%E8%A1%8C%E7%89%88"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 官方发行版</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E6%84%8F%E5%8F%91%E8%A1%8C%E7%89%88"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 任意发行版</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96-tar-%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.2.1 获取 tar 文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5-tar"><span class="toc-number">1.2.2.</span> <span class="toc-text">1.2.2 导入 tar</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%80%E5%87%BA%E5%85%B3%E9%97%AD-wsl"><span class="toc-number">2.</span> <span class="toc-text">2. 退出&#x2F;关闭 WSL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4"><span class="toc-number">3.</span> <span class="toc-text">3. 常用指令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%87%BA%E5%AF%BC%E5%85%A5%E5%8F%91%E8%A1%8C%E7%89%88"><span class="toc-number">4.</span> <span class="toc-text">4. 导出&#x2F;导入发行版</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/04/WSL/" title="WSL常见指令">WSL常见指令</a><time datetime="2025-09-04T11:47:46.000Z" title="发表于 2025-09-04 19:47:46">2025-09-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/02/%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6/" title="不可见字符">不可见字符</a><time datetime="2025-09-02T04:06:52.000Z" title="发表于 2025-09-02 12:06:52">2025-09-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/BF05/" title="贝叶斯滤波器系列(5) - 一维卡尔曼滤波">贝叶斯滤波器系列(5) - 一维卡尔曼滤波</a><time datetime="2025-09-01T13:48:45.000Z" title="发表于 2025-09-01 21:48:45">2025-09-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/BF04/" title="贝叶斯滤波器系列(4) - G-H 滤波器">贝叶斯滤波器系列(4) - G-H 滤波器</a><time datetime="2025-09-01T13:48:44.000Z" title="发表于 2025-09-01 21:48:44">2025-09-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/01/BF03/" title="贝叶斯滤波器系列(3) - 贝叶斯学派">贝叶斯滤波器系列(3) - 贝叶斯学派</a><time datetime="2025-09-01T13:48:43.000Z" title="发表于 2025-09-01 21:48:43">2025-09-01</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://w.wallhaven.cc/full/1p/wallhaven-1prrw9.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By Reglucis</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
